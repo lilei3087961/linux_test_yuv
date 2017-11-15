@@ -67,7 +67,8 @@ int process_image(void *addr, int length)
 		perror("Fail to fopen JPG");
 		exit(EXIT_FAILURE);
 	}
-	fwrite(addr, WIDTH*HIGHT*2 , 1, fp);
+	//fwrite(addr, WIDTH*HIGHT*2 , 1, fp);
+        fwrite(addr, length , 1, fp);
 	usleep(500);
 	fclose(fp);
 	return 0;
@@ -99,21 +100,3 @@ int main()
 	parse_jpeg2yuv(pFile,len);
 	fclose(pFile);
 }
-/**
- FILE *out;
- char ch;
- char image_name[] = {"./out/1.jpg"};
- char pBuffer[8]; 
- if((out = fopen(image_name,"w")) == NULL)
- {
-   printf("main() fopen .out/1.jpg error) \n"); 
-	exit(0);
- }
-  while(!feof(pFile))
-  {
-	fread(pBuffer, 1, 8, pFile);   // 每次读8个字节 
-    fwrite(pBuffer, 1, 8, out);  // 每次写8个字节 
-	printf("%d",pBuffer);
-  }
-	fclose(out);
-**/
