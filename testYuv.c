@@ -17,7 +17,7 @@
 #include "utils.h"
 
 #define WIDTH		320
-#define	HIGHT		220
+#define	HIGHT		240
 #define FILE_VIDEO  "/dev/video0"
 #define JPG "./out/image%d"
 typedef struct{
@@ -30,7 +30,7 @@ static unsigned int n_buffer = 0;
 struct timeval time;
 unsigned char* mjpeg_buff;
 unsigned char* yuyv_buff;
-unsigned char* yuv_buff;
+unsigned char* yuv420_buff;
 
 void init_mjpeg_encode(void)
 {
@@ -46,13 +46,13 @@ void init_mjpeg_encode(void)
 		perror("mjpeg_encode malloc err\n");
 	};
 
-	yuv_buff = (unsigned char*)malloc(WIDTH * HIGHT * 2);
-	if(yuyv_buff ==  NULL)
+	yuv420_buff = (unsigned char*)malloc(WIDTH * HIGHT * 1.5);
+	if(yuv420_buff ==  NULL)
 	{
-		perror("mjpeg_encode malloc err\n");
+		perror("mjpeg_encode malloc yuv420_buff err\n");
 	};
 
-	memset(yuv_buff, 0, WIDTH * HIGHT * 2);
+	memset(yuv420_buff, 0, WIDTH * HIGHT * 1.5);
 	
 }
 int process_image(void *addr, int length)
@@ -82,7 +82,12 @@ int parse_jpeg2yuv(FILE *pFile,int len)
 	size_t result = fread(mjpeg_buff,1,len,pFile); 
 	printf("parse_jpeg2yuv 222 mjpeg_buff:%p len:%d result:%d \n",mjpeg_buff,strlen(mjpeg_buff),result);
 	jpeg_decode(&yuyv_buff, mjpeg_buff, &k, &j);
-	process_image(yuyv_buff, WIDTH * HIGHT*2);
+	//process_image(yuyv_buff, WIDTH * HIGHT*2);
+        //YUV422ToI420(yuyv_buff,yuv420_buff,WIDTH,HIGHT);
+        YUV422ToNv21(yuyv_buff,yuv420_buff,WIDTH,HIGHT);
+        //yuv422toyuv420(yuv420_buff,yuyv_buff,WIDTH,HIGHT);
+        printf("parse_jpeg2yuv 333 YUV422ToNv21 yuv420_buff:%p  \n",yuv420_buff);
+        process_image(yuv420_buff, WIDTH * HIGHT*1.5);
 }
 int main()
 {
