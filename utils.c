@@ -1331,3 +1331,59 @@ int YUV422ToNv21(unsigned char yuv422[], unsigned char yuv420[], int width, int 
 
        return 1;
 } 
+//将yuyv422转换为yv12
+int YUV422ToYv12(unsigned char yuv422[], unsigned char yuv420[], int width, int height)
+{
+
+       int ynum=width*height;
+       int i,j,k=0;
+       //得到Y分量
+       for(i=0;i<ynum;i++){
+           yuv420[i]=yuv422[i*2];
+       }
+      //得到U分量
+	  for(i=0;i<height;i++){
+		  if((i%2)!=0)continue;
+		  for(j=0;j<(width/2);j++){
+			  if((4*j+1)>(2*width))break;
+			  yuv420[ynum+ynum/4+k*2*width/4+j]=yuv422[i*2*width+4*j+1];
+					  }
+		   k++;
+	  }
+	  k=0;
+	   //得到V分量
+	  for(i=0;i<height;i++){
+		  if((i%2)==0)continue;
+		  for(j=0;j<(width/2);j++){
+			  if((4*j+3)>(2*width))break;
+			  yuv420[ynum+k*2*width/4+j]=yuv422[i*2*width+4*j+3];
+
+		  }
+		   k++;
+	  }
+
+
+       return 1;
+}
+//将nv21转换为yv12
+int Nv21ToYv12(unsigned char *nv21_buff, unsigned char *yv12_buff, int width, int height)
+{
+	int ynum=width*height;
+	int nv21_vu_count = ynum/2;
+	unsigned char * nv21_buff_vu =nv21_buff+ynum;
+	unsigned char * yv12_buff_v =yv12_buff+ynum;    //yv12 v地址
+	unsigned char * yv12_buff_u =yv12_buff+ynum*5/4;//yv12 u地址
+	//从nv21拷贝y分量到yv12
+	memcpy(yv12_buff,nv21_buff,ynum);
+	for(int i=0;i<nv21_vu_count;i++){
+		if(i%2 == 0){  //取v分量
+			*yv12_buff_v = *nv21_buff_vu;
+			yv12_buff_v++;
+			nv21_buff_vu++;
+		}else{ //取u分量
+			*yv12_buff_u = *nv21_buff_vu;
+			yv12_buff_u++;
+			nv21_buff_vu++;
+		}
+	}
+}
