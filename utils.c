@@ -1387,3 +1387,23 @@ int Nv21ToYv12(unsigned char *nv21_buff, unsigned char *yv12_buff, int width, in
 		}
 	}
 }
+//将yv12转换为nv21
+int Yv12ToNv21(unsigned char *yv12_buff, unsigned char *nv21_buff, int width, int height)
+{
+	int ynum=width*height;
+	int yv12_v_count = ynum/4;
+	int yv12_u_count = ynum/4;
+	unsigned char * yv12_buff_v =yv12_buff+ynum;
+	unsigned char * yv12_buff_u =yv12_buff+ynum*5/4;
+	unsigned char * nv21_buff_vu =nv21_buff+ynum;    //nv21 vu地址
+	//从yv12拷贝y分量到nv21
+	memcpy(nv21_buff,yv12_buff,ynum);
+	for(int i=0;i<yv12_v_count;i++){//取yv12 v分量赋值到nv21
+		*(nv21_buff_vu+i*2) = *yv12_buff_v;
+		yv12_buff_v++;
+	}
+	for(int i=0;i<yv12_u_count;i++){//取yv12 v分量赋值到nv21
+		*(nv21_buff_vu+i*2+1) = *yv12_buff_u;
+		yv12_buff_u++;
+	}
+}

@@ -18,8 +18,8 @@
 
 #define WIDTH		320
 #define	HIGHT		240
-#define WIDTH_BIG       640
-#define HIGHT_BIG       480
+#define WIDTH_BIG       640//1920
+#define HIGHT_BIG       480//1080
 #define FILE_VIDEO  "/dev/video0"
 #define JPG "./out/image_%s"
 typedef struct{
@@ -76,11 +76,15 @@ int merge_two_yuv_for_nv21(unsigned char *big_buff,int width_big,int height_big,
 
     int small_vu_distance = width_small*height_small;
     int large_vu_distance = width_big*height_big;
+    int offset_horizontal = +10; //基于小图居中横向偏移量
+    int offset_vertical = +10;   //基于小图居中纵向偏移量
+    int y_offset = width_big*offset_vertical+offset_horizontal;//基于小图居中后y偏移量
+    int vu_offset = width_big*offset_vertical/2 +offset_horizontal;//基于小图居中后vu偏移量
 
     int y_center_offset = ((height_big - height_small)/2)*width_big + (width_big-width_small)/2;
     int vu_center_offset = ((height_big - height_small)/4)*width_big + (width_big-width_small)/2;
-    unsigned char * big_buff_y =big_buff + y_center_offset;
-    unsigned char * big_buff_vu = big_buff+large_vu_distance+vu_center_offset;
+    unsigned char * big_buff_y =big_buff + y_center_offset+y_offset;
+    unsigned char * big_buff_vu = big_buff+large_vu_distance+vu_center_offset+vu_offset;
     unsigned char * small_buff_y = small_buff; 
     unsigned char * small_buff_vu = small_buff + small_vu_distance;
     printf("##merge_two_yuv_for_nv21  large_vu_distance:%d,small_vu_distance:%d \n",large_vu_distance,small_vu_distance);
@@ -97,7 +101,7 @@ int merge_two_yuv_for_nv21(unsigned char *big_buff,int width_big,int height_big,
      }
     //dump_yuv(nv21_test_buff,width_small*height_small*3/2,"nv21_small");
     //dump_yuv(nv21_test_buff_big,width_big*height_big*3/2,"nv21_big");
-    dump_yuv(big_buff,width_big*height_big*3/2,"out/image_nv21_merge.yuv");
+    dump_yuv(big_buff,width_big*height_big*3/2,"out/image_nv21_merge_+10_+10.yuv");
 }
 int merage_jpeg2yuv_for_nv21(char *jpegPath,int width_small,int height_small,unsigned char * camera_buff,int width_big,int height_big)
 {
@@ -154,13 +158,18 @@ void merge_two_yuv_for_yv12(unsigned char *big_buff,int width_big,int height_big
     }
     int small_vu_distance = width_small*height_small;
     int large_vu_distance = width_big*height_big;
+    int offset_horizontal = -10; //基于小图居中横向偏移量
+    int offset_vertical = -10;   //基于小图居中纵向偏移量
+    int y_offset = width_big*offset_vertical+offset_horizontal;//基于小图居中后y偏移量
+    int v_offset = (width_big/2)*offset_vertical/2 +offset_horizontal/2; //基于小图居中后v偏移量
+    int u_offset = (width_big/2)*offset_vertical/2 +offset_horizontal/2; //基于小图居中后u偏移量
 
     int y_center_offset = ((height_big - height_small)/2)*width_big + (width_big-width_small)/2;
     int v_center_offset = ((height_big - height_small)/4)*width_big/2 + (width_big-width_small)/4;
     int u_center_offset = ((height_big - height_small)/4)*width_big/2 + (width_big-width_small)/4;
-    unsigned char * big_buff_y =big_buff + y_center_offset;
-    unsigned char * big_buff_v = big_buff+large_vu_distance + v_center_offset;
-    unsigned char * big_buff_u = big_buff+large_vu_distance*5/4 + u_center_offset;
+    unsigned char * big_buff_y =big_buff + y_center_offset+y_offset;
+    unsigned char * big_buff_v = big_buff+large_vu_distance + v_center_offset+v_offset;
+    unsigned char * big_buff_u = big_buff+large_vu_distance*5/4 + u_center_offset+u_offset;
     unsigned char * small_buff_y = small_buff;
     unsigned char * small_buff_v = small_buff + small_vu_distance;
     unsigned char * small_buff_u = small_buff + small_vu_distance*5/4;
@@ -182,7 +191,7 @@ void merge_two_yuv_for_yv12(unsigned char *big_buff,int width_big,int height_big
 
      //dump_yuv(nv21_test_buff,width_small*height_small*3/2,"/sdcard/DCIM/image_nv21_small.yuv");
      //dump_yuv(nv21_test_buff_big,width_big*height_big*3/2,"/sdcard/DCIM/image_nv21_big.yuv");
-     dump_yuv(big_buff,width_big*height_big*3/2,"out/image_yv12_merge.yuv");
+     dump_yuv(big_buff,width_big*height_big*3/2,"out/image_yv12_merge_-10_-10.yuv");
 }
 //将jpeg合并到yv12图像中
 void merge_jpeg2yuv_for_yv12(const char *jpegPath,int width_small,int height_small,unsigned char * camera_buff,int width_big,int height_big)
@@ -314,15 +323,129 @@ int get_camera_buff()
         printf("get_camera_buff() lenyuv:%d result:%d\n",lenyuv,result);
         
 }
+int init_buffer(){
+	yuv420_buff_for_nv21 = (unsigned char*)malloc(WIDTH_BIG * HIGHT_BIG * 1.5);
+	if(yuv420_buff_for_nv21 == NULL){
+		perror("init_bufffer() 111 malloc yuv420_buff_for_nv21 err\n");
+	}else{
+		memset(yuv420_buff_for_nv21,0,WIDTH_BIG * HIGHT_BIG * 1.5);
+	}
+	yuv420_buff_for_yv12 = (unsigned char*)malloc(WIDTH_BIG * HIGHT_BIG * 1.5);
+	if(yuv420_buff_for_yv12 == NULL){
+			perror("init_bufffer() 222 malloc yuv420_buff_for_yv12 err\n");
+		}else{
+			memset(yuv420_buff_for_yv12,0,WIDTH_BIG * HIGHT_BIG * 1.5);
+	}
+	//char stryuvpath[80] = {"camera_nv21.yuv"};
+	//char stryuvpath[80] = {"camera_yv12.yuv"};
+	char stryuvpath[80] = {"camera_taobao_yv12_640x480.yuv"};
+	FILE * fileYuv = fopen(stryuvpath,"rb");
+	fseek(fileYuv,0,SEEK_END); /* 定位到文件末尾 */
+	int lenyuv = ftell(fileYuv);
+	fseek(fileYuv,0l,SEEK_SET); /* 定位到文件开头 */
+	//size_t result = fread(yuv420_buff_for_nv21,1,lenyuv,fileYuv);
+	size_t result = fread(yuv420_buff_for_yv12,1,lenyuv,fileYuv);
+	fclose(fileYuv);
+	printf("get_camera_buff() lenyuv:%d result:%d\n",lenyuv,result);
+}
+int test(){
+	char MODEL[] ="GOME 2018M29A";
+	char currentModel[] = "GOME 2018M29A2";
+	int x = 0;
+	int y = 0;
+	getQrcodeOffset(&x,&y);
+	printf("x:%d,y:%d",x,y);
+	if(0 == strcmp(currentModel,MODEL)){
+		printf("currentModel:%s, same as:%s",currentModel,MODEL);
+	}else{
+		printf("currentModel:%s, not same as:%s",currentModel,MODEL);
+	}
+	printf("testyuv.c test()  \n");
+	init_buffer();
+//	Nv21ToYv12(yuv420_buff_for_nv21,yuv420_buff_for_yv12,WIDTH_BIG,HIGHT_BIG);
+//	dump_yuv(yuv420_buff_for_yv12,WIDTH_BIG*HIGHT_BIG*3/2,"out/Nv21ToYv12.yuv");
+	Yv12ToNv21(yuv420_buff_for_yv12,yuv420_buff_for_nv21,WIDTH_BIG,HIGHT_BIG);
+	dump_yuv(yuv420_buff_for_nv21,WIDTH_BIG*HIGHT_BIG*3/2,"out/camera_taobao_nv21_640x480.yuv");
+}
+int getQrcodeOffset(int *x,int *y){
+	*x= 100;
+	*y= 200;
+}
+/*截取src字符串中,从下标为start开始到end-1(end前面)的字符串保存在dest中(下标从0开始)*/
+void substring(char *dest,char *src,int start,int end)
+{
+    int i=start;
+    if(start>strlen(src))return;
+    if(end>strlen(src))
+        end=strlen(src);
+    while(i<end)
+    {
+        dest[i-start]=src[i];
+        i++;
+    }
+    dest[i-start]='\0';
+    return;
+}
+/*返回str1中最后一次出现str2的位置(下标),不存在返回-1*/
+int lastIndexOf(char *str1,char *str2)
+{
+    char *p=str1;
+    int i=0,len=strlen(str2);
+    p=strstr(str1,str2);
+    if(p==NULL)return -1;
+    while(p!=NULL)
+    {
+        for(;str1!=p;str1++)i++;
+        p=p+len;
+        p=strstr(p,str2);
+    }
+    return i;
+}
 
+int testSpliteString(){//从路径中解析出宽高
+char str[] = {"/sdcard/DCIM/qrcode_300x300.yuv"};
+int indexbegin = lastIndexOf(str,"_");
+int indexend = lastIndexOf(str,".");
+int length = indexend - indexbegin;
+char subStr[length-1];
+substring(subStr,str,indexbegin+1,indexend);
+printf( "result indexbegin:%d,indexend:%d,length:%d,subStr:%s \n", indexbegin,indexend,length,subStr);
+char delims[] = "x";
+char *result = NULL;
+result = strtok( subStr, delims );
+if(result != NULL){
+	printf( "width is:%s \n", result );
+	result = strtok( NULL, delims );
+}
+if(result != NULL){
+	printf( "height is:%s \n", result );
+}
+	//char str[] = "now # is the time for all # good men to come to the # aid of their country";
+//	   char delims[] = "/";
+//	   char * subStr = ".yuv"; //需要的子串
+//	   char *result = NULL;
+//	   result = strtok( str, delims );
+//	   while( result != NULL ) {
+//	       //printf( "result is \"%s\"\n", result );
+//		   printf( "result is:%s \n", result );
+//		   if(strstr(result,subStr)){
+//			   printf( "result is:%s contains:%s \n", result, subStr);
+//
+//		   }
+//	       result = strtok( NULL, delims );
+//	   }
+
+}
 int main()
 {
 	printf("testyuv.c main() 000 \n");
-        get_camera_buff();
+	//testString();
+	test();
+//        get_camera_buff();
+//
+//        merge_yuv2yuv_for_yv12("image1_320x280.yuv",320,280,yuv420_buff_big,WIDTH_BIG,HIGHT_BIG);
 
-        merge_yuv2yuv_for_yv12("image1_640x480.yuv",640,480,yuv420_buff_big,WIDTH_BIG,HIGHT_BIG);
-
-       // merge_yuv2yuv_for_nv21("image1_320x280.yuv",320,280,yuv420_buff_big,WIDTH_BIG,HIGHT_BIG);
+//        merge_yuv2yuv_for_nv21("image1_320x280.yuv",320,280,yuv420_buff_big,WIDTH_BIG,HIGHT_BIG);
 
         //merge_jpeg2yuv_for_yv12("1.jpg",320,240,yuv420_buff_big,WIDTH_BIG,HIGHT_BIG);
         //merage_jpeg2yuv_for_nv21("1_300x200.jpg",640,480,yuv420_buff_big,WIDTH_BIG,HIGHT_BIG);
