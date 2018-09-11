@@ -8,8 +8,8 @@ CC = gcc
 #LIBS = -lpthread 
 #DEP_LIBS = -L$(TOP_DIR)/lib
 HEADER =
-OBJS = testYuv.o color.o utils.o 
-
+#OBJS = testYuv.o color.o utils.o 
+OBJS = test.o
 all:  $(OBJS)
 	$(CC)  -o $(APP) $(OBJS) 
 
