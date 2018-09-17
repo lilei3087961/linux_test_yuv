@@ -137,6 +137,10 @@ int main(){
     }
   }  
   midOrder(nodes[0]);
+  for(int i=0;i<SIZE;i++){ //release struct
+    free(nodes[i]);
+    nodes[i] = NULL; 
+  }
   //preOrder(nodes[0]);  
 /*  int a [6] = {4,2,3,9,7,1};
   printArr(a,6);
