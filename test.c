@@ -117,9 +117,22 @@ void printArr(int arr[],int len){
   }
   printf("\n");
 }
+BiNode* invertTree(BiNode* root){
+  if(NULL == root){
+     return NULL;
+  }
+  root->lchild = invertTree(root->lchild);
+  root->rchild = invertTree(root->rchild);
+  BiNode* tmp = root->lchild;
+  root->lchild = root->rchild;
+  root->rchild = tmp;
+  return root;
+}
 #define SIZE 7
 int main(){
-
+  if(0){
+    return 1; 
+  }
   printf("test lilei btree test\n");
   int a [SIZE] = {4,2,3,9,7,1,8};
   printArr(a,SIZE);
@@ -137,6 +150,11 @@ int main(){
     }
   }  
   midOrder(nodes[0]);
+  preOrder(nodes[0]);
+  printf("lilei call invertTree --------------\n");
+  invertTree(nodes[0]);
+  midOrder(nodes[0]);
+  preOrder(nodes[0]);
   for(int i=0;i<SIZE;i++){ //release struct
     free(nodes[i]);
     nodes[i] = NULL; 
